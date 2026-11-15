@@ -93,6 +93,7 @@ Set `ALERT_TO_NUMBER` to your initial recipient and `ALERT_BACKUP_NUMBER` to you
 
 `zadarma_check.py` uses `ZADARMA_KEY` and `ZADARMA_SECRET` from the ignored local `.env`. Run `.\.venv\Scripts\python.exe zadarma_check.py` for read-only authentication, balance, destination-price, SIP and PBX checks. Its allowlist rejects call-origination endpoints. It does not switch the Flask lab to Zadarma. The live backend remains Twilio.
 
-The connected Zadarma account was checked on 2 November 2026: authentication succeeded, balance was USD 0.50, and both destination-specific price lookups returned USD 0.75/minute. Its sole voice menu was disabled (`type=none`) with zero scenarios. No calls were originated and no remote account settings were changed. The prices and balance may change; rerun the checker for current values. Zadarma Standard advertises per-second billing, so this balance is not automatically enough or insufficient for a specific test duration.
+No calls are originated by the account-check tool. Prices and balances may change; rerun the checker for current values. Zadarma Standard advertises per-second billing.
 
 Zadarma callback uses SIP/PBX endpoints rather than inline TwiML. A speech-capable endpoint and a Zadarma calling backend still need configuring before this lab can deliver its spoken messages through Zadarma. See the [callback documentation](https://zadarma.com/en/services/calls/callback/) and [voice-menu setup](https://zadarma.com/en/support/faq/pbx/how-to-turn-on-voice-menu/).
+
