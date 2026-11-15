@@ -1,0 +1,21 @@
+<!doctype html>
+<html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="refresh" content="5"><title>Incident escalation lab</title>
+<style>body{font:16px system-ui;max-width:1000px;margin:32px auto;padding:0 20px;background:#f1f5f9;color:#172033}article{background:white;border:1px solid #ccd5df;border-radius:10px;padding:20px;margin:20px 0}button{padding:10px;margin:6px 0;cursor:pointer}table{width:100%;border-collapse:collapse}td,th{text-align:left;padding:8px;border-bottom:1px solid #ddd;overflow-wrap:anywhere}small{color:#475569}form{display:inline-block;margin-right:12px}.live{color:#a22020}</style>
+<h1>Incident-alert escalation lab</h1>
+<p class="{{ 'live' if live else '' }}"><strong>{{ 'LIVE — real paid telephone calls armed' if live else 'DRY RUN — no telephone calls' }}</strong> · Initial {{ target }} · Backup {{ backup }}</p>
+<p>Synthetic data only: high-severity alert on <strong>SRV-FILE01</strong>. A second call is reserved after 60 seconds unless acknowledged. Answering the phone never acknowledges an alert. All timestamps below are UTC.</p>
+<form method="post" action="/generate"><input type="hidden" name="csrf" value="{{ csrf }}">
+{% if live %}<p><label><input type="checkbox" name="live_consent" value="yes" required> These are my numbers. I authorize up to two paid calls for this alert.</label></p>{% endif %}
+<button>Generate synthetic security alert</button></form>
+<p><small>One unresolved alert at a time. Page refreshes every five seconds. A committed call reservation cannot be canceled by a later acknowledgment.</small></p>
+{% for a in alerts %}<article>
+<h2>Alert #{{ a.id }} · {{ a.mode }} · {{ 'Resolved' if a.resolved_utc else ('Acknowledged' if a.acknowledged_utc else 'Awaiting acknowledgment') }}</h2>
+<p>Created: {{ a.created_utc }}<br>Escalation due: {{ a.due_utc }}<br>Acknowledged: {{ a.acknowledged_utc or '—' }}<br>Resolved: {{ a.resolved_utc or '—' }}</p>
+{% if not a.config_matches %}<p class="live">Dispatch paused: this alert belongs to another mode/account/number configuration. Acknowledge and resolve it here, or restart with its original configuration.</p>{% endif %}
+{% if not a.acknowledged_utc %}<form method="post" action="/alerts/{{ a.id }}/ack"><input type="hidden" name="csrf" value="{{ csrf }}"><button>Acknowledge on computer</button></form>{% endif %}
+{% if a.acknowledged_utc and not a.resolved_utc %}<form method="post" action="/alerts/{{ a.id }}/resolve"><input type="hidden" name="csrf" value="{{ csrf }}"><button>Resolve alert</button></form>{% endif %}
+<table><tr><th>Call slot</th><th>Request outcome</th><th>Details</th></tr>
+{% for c in a.calls %}<tr><td>{{ 'Initial' if c.slot == 1 else 'Backup engineer escalation' }}<br><small>{{ c.reserved_utc }}</small></td><td>{{ c.state }}<br><small>{{ c.finished_utc or 'No final local outcome recorded' }}</small></td><td>{{ c.detail }}{% if c.call_sid %}<br>Call SID: {{ c.call_sid }}{% endif %}</td></tr>{% else %}<tr><td colspan="3">No call reserved yet.</td></tr>{% endfor %}</table>
+</article>{% else %}<article>No synthetic alerts yet.</article>{% endfor %}
+</html>
